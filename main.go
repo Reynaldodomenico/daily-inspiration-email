@@ -8,6 +8,9 @@ import (
     "log"
     "net/http"
     "net/smtp"
+    "time"
+
+    "github.com/robfig/cron/v3"
 )
 
 type Quote struct {
@@ -131,6 +134,24 @@ func sendDailyEmail() {
 }
 
 func main() {
-   sendDailyEmail() // Send immediately on startup
+    // Set timezone GMT+2
+    loc, err := time.LoadLocation("Etc/GMT-2")
+    if err != nil {
+        log.Fatal("Error loading timezone:", err)
+    }
+
+    c := cron.New(cron.WithLocation(loc))
+
+    // Schedule at (8:00) AM GMT+2 daily (europe/berlin time)
+    _, err = c.AddFunc("0 8 * * *", sendDailyEmail)
+    if err != nil {
+        log.Fatal("Error scheduling cron job:", err)
+    }
+
+    c.Start()
+
+    log.Println("Scheduler running. Waiting for 8:00 AM GMT+2...")
+
+    select {}
 }
 
