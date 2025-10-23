@@ -8,15 +8,21 @@ import (
     "log"
     "net/http"
     "net/smtp"
-
 )
 
 type Quote struct {
-    Q string `json:"q"`
-    A string `json:"a"` 
+    Content string `json:"content"`
+    Author  string `json:"author"`
 }
 
-// Fetch a random quote
+// Unsplash API response struct
+type UnsplashImage struct {
+    URLs struct {
+        Regular string `json:"regular"`
+    } `json:"urls"`
+}
+
+// Fetch a random quote using ZenQuotes (safer than Quotable)
 func fetchQuote() (string, error) {
     resp, err := http.Get("https://zenquotes.io/api/random")
     if err != nil {
@@ -24,27 +30,46 @@ func fetchQuote() (string, error) {
     }
     defer resp.Body.Close()
 
-    var q []Quote
+    var q []struct {
+        Q string `json:"q"`
+        A string `json:"a"`
+    }
+
     if err := json.NewDecoder(resp.Body).Decode(&q); err != nil {
         return "", err
     }
+
     return fmt.Sprintf("%s — %s", q[0].Q, q[0].A), nil
 }
 
-// Fetch a random image
+// Fetch a random scenery image from Unsplash
 func fetchImage() ([]byte, error) {
-    resp, err := http.Get("https://picsum.photos/400")
+    apiKey := "xxx"
+    resp, err := http.Get(fmt.Sprintf("https://api.unsplash.com/photos/random?query=scenery&client_id=%s", apiKey))
     if err != nil {
         return nil, err
     }
     defer resp.Body.Close()
-    return io.ReadAll(resp.Body)
+
+    var img UnsplashImage
+    if err := json.NewDecoder(resp.Body).Decode(&img); err != nil {
+        return nil, err
+    }
+
+    // Fetch the actual image bytes
+    imgResp, err := http.Get(img.URLs.Regular)
+    if err != nil {
+        return nil, err
+    }
+    defer imgResp.Body.Close()
+
+    return io.ReadAll(imgResp.Body)
 }
 
 // Send email with inline image
 func sendEmail(subject, quote string, image []byte) error {
     from := "reynaldodomenico@gmail.com"
-    password := "plba lbqu hodt sebq"
+    password := "xxx"
     to := "reynaldodomenico@yahoo.com"
 
     smtpHost := "smtp.gmail.com"
@@ -106,5 +131,6 @@ func sendDailyEmail() {
 }
 
 func main() {
-    sendDailyEmail()
+   sendDailyEmail() // Send immediately on startup
 }
+
