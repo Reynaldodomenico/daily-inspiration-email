@@ -8,9 +8,11 @@ import (
     "log"
     "net/http"
     "net/smtp"
+    "os"
     "time"
 
     "github.com/robfig/cron/v3"
+    "github.com/joho/godotenv"
 )
 
 type Quote struct {
@@ -47,7 +49,7 @@ func fetchQuote() (string, error) {
 
 // Fetch a random scenery image from Unsplash
 func fetchImage() ([]byte, error) {
-    apiKey := "xxx"
+    apiKey := os.Getenv("UNSPLASH_API_KEY")
     resp, err := http.Get(fmt.Sprintf("https://api.unsplash.com/photos/random?query=scenery&client_id=%s", apiKey))
     if err != nil {
         return nil, err
@@ -71,9 +73,9 @@ func fetchImage() ([]byte, error) {
 
 // Send email with inline image
 func sendEmail(subject, quote string, image []byte) error {
-    from := "reynaldodomenico@gmail.com"
-    password := "xxx"
-    to := "reynaldodomenico@yahoo.com"
+    from := os.Getenv("FROM_EMAIL")
+    password := os.Getenv("FROM_EMAIL_PASSWORD")
+    to := os.Getenv("TO_EMAIL")
 
     smtpHost := "smtp.gmail.com"
     smtpPort := "587"
@@ -134,6 +136,10 @@ func sendDailyEmail() {
 }
 
 func main() {
+    if err := godotenv.Load(); err != nil {
+        log.Println("No .env file found, using system environment variables")
+    }
+
     // Set timezone GMT+2
     loc, err := time.LoadLocation("Etc/GMT-2")
     if err != nil {
@@ -142,7 +148,7 @@ func main() {
 
     c := cron.New(cron.WithLocation(loc))
 
-    // Schedule at (8:00) AM GMT+2 daily (europe/berlin time)
+    // Schedule job at 8:00 AM GMT+2 daily (europe/berlin time)
     _, err = c.AddFunc("0 8 * * *", sendDailyEmail)
     if err != nil {
         log.Fatal("Error scheduling cron job:", err)
@@ -150,7 +156,7 @@ func main() {
 
     c.Start()
 
-    log.Println("Scheduler running. Waiting for 8:00 AM GMT+2...")
+    log.Println("Scheduler running. Waiting for 8:00 AM Berlin time to send email")
 
     select {}
 }
