@@ -1,6 +1,10 @@
 # Daily Inspiration Email Sender
 
-A Go application that sends a daily email with a random inspirational quote and scenery image at a scheduled time.
+A lightweight Go application that sends a daily email containing:
+- a random inspirational quote, and
+- a random scenery image (from Unsplash).
+
+The app is automated with GitHub Actions, which runs it every day at 08:00 (Berlin time)
 
 ---
 
