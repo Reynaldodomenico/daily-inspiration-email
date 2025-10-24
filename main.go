@@ -9,9 +9,7 @@ import (
     "net/http"
     "net/smtp"
     "os"
-    "time"
-
-    "github.com/robfig/cron/v3"
+    
     "github.com/joho/godotenv"
 )
 
