@@ -31,6 +31,6 @@ jobs:
         env:
           FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          FROM_EMAIL_PASSWORD: ${{ secrets.FROM_EMAIL_PASSWORD }}
           UNSPLASH_API_KEY: ${{ secrets.UNSPLASH_API_KEY }}
         run: ./daily-email
