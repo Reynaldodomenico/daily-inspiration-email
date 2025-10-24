@@ -2,8 +2,8 @@ name: Daily Inspiration Email
 
 on:
   schedule:
-    - cron: '23 23 * * *'  # GitHub Actions uses UTC; 23:23 UTC = 1:23 AM GMT+2
-  workflow_dispatch:      # Allows manual run from Actions tab
+    - cron: '0 8 * * *' 
+  workflow_dispatch:
 
 jobs:
   send-email:
