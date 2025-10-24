@@ -18,14 +18,12 @@ type Quote struct {
     Author  string `json:"author"`
 }
 
-// Unsplash API response struct
 type UnsplashImage struct {
     URLs struct {
         Regular string `json:"regular"`
     } `json:"urls"`
 }
 
-// Fetch a random quote using ZenQuotes (safer than Quotable)
 func fetchQuote() (string, error) {
     resp, err := http.Get("https://zenquotes.io/api/random")
     if err != nil {
@@ -45,7 +43,6 @@ func fetchQuote() (string, error) {
     return fmt.Sprintf("%s — %s", q[0].Q, q[0].A), nil
 }
 
-// Fetch a random scenery image from Unsplash
 func fetchImage() ([]byte, error) {
     apiKey := os.Getenv("UNSPLASH_API_KEY")
     resp, err := http.Get(fmt.Sprintf("https://api.unsplash.com/photos/random?query=scenery&client_id=%s", apiKey))
@@ -58,8 +55,6 @@ func fetchImage() ([]byte, error) {
     if err := json.NewDecoder(resp.Body).Decode(&img); err != nil {
         return nil, err
     }
-
-    // Fetch the actual image bytes
     imgResp, err := http.Get(img.URLs.Regular)
     if err != nil {
         return nil, err
@@ -69,7 +64,6 @@ func fetchImage() ([]byte, error) {
     return io.ReadAll(imgResp.Body)
 }
 
-// Send email with inline image
 func sendEmail(subject, quote string, image []byte) error {
     from := os.Getenv("FROM_EMAIL")
     password := os.Getenv("FROM_EMAIL_PASSWORD")
@@ -111,7 +105,6 @@ Content-ID: <image1>
     return smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, msg)
 }
 
-// Job to send daily email
 func sendDailyEmail() {
     quote, err := fetchQuote()
     if err != nil {
